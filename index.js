@@ -66,8 +66,50 @@ app.post('/tasks', (req, res) => {
     };
     
     tasks.push(newTask);
-    
+
     res.status(201).json(newTask);
+});
+
+app.put('/tasks/:id', (req, res) => {
+    const taskId = parseInt(req.params.id);
+    const task = tasks.find(t => t.id === taskId);
+
+    if (!task) {
+        return res.status(404).json({ message: `Task ${taskId} not found` });
+    }
+    
+    const { title, done } = req.body;
+
+    if (title === undefined && done === undefined) {
+        return res.status(400).json({ message: "At least one field (title or done) is required" });
+    }
+
+    if (title !== undefined && title.trim() === "") {
+        return res.status(400).json({ message: "Title cannot be empty" });
+    }
+    if (title !== undefined) {
+        task.title = title.trim();
+    }
+    if (done !== undefined && typeof done !== 'boolean') {
+        return res.status(400).json({ message: "Done must be a boolean value" });
+    }
+    if (done !== undefined) {
+        task.done = done;
+    }
+
+    res.status(200).json(task);
+});
+
+app.delete('/tasks/:id', (req, res) => {
+    const taskId = parseInt(req.params.id);
+    const taskIndex = tasks.findIndex(t => t.id === taskId);
+    
+    if (taskIndex === -1) {
+        return res.status(404).json({ message: `Task ${taskId} not found` });
+    }
+
+    tasks.splice(taskIndex, 1);
+    res.status(204).send();
 });
 
 app.listen(port, () => {
