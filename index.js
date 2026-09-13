@@ -5,25 +5,32 @@ app.use(express.json());
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./openapi.json");
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('tasks.db');
 
+db.serialize(() => {
+    db.run(`CREATE TABLE IF NOT EXISTS tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        done BOOLEAN NOT NULL DEFAULT false
+    )`);
 
-const tasks = [
-    {
-        id: 1,
-        title: "Learn Node.js",
-        done: true
-    },
-    {
-        id: 2,
-        title: "Build a REST API",
-        done: false
-    },
-    {
-        id: 3,
-        title: "Test the API",
-        done: false
-    }
-];
+    db.get("SELECT COUNT(*) AS count FROM tasks", (err, row) => {
+        if (err) {
+            console.error("Error counting tasks:", err);
+            return;
+        }
+
+        if (row.count === 0) {
+            const stmt = db.prepare("INSERT INTO tasks (title, done) VALUES (?, ?)");
+            stmt.run("Learn Node.js", true);
+            stmt.run("Build a REST API", false);
+            stmt.run("Test the API", false);
+            stmt.finalize();
+            console.log("Inserted initial tasks into the database.");
+        }
+    });
+});
 
 app.get('/', (req, res) => {
     res.json({
