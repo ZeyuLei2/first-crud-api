@@ -47,19 +47,27 @@ app.get("/health", (req, res) => {
 });
 
 app.get('/tasks', (req, res) => {
-    res.json(tasks);
+    db.all("SELECT * FROM tasks", (err, rows) => {
+        if (err) {
+            console.error("Error fetching tasks:", err);
+            return res.status(500).json({ message: "Error fetching tasks" });
+        }
+        res.json(rows);
+    });
 });
 
 app.get('/tasks/:id', (req, res) => {  
-    const  taskId = parseInt(req.params.id);
-    const task = tasks.find(t => t.id === taskId);
-
-    if (!task) {
-        return res.status(404).json({ message: `Task ${taskId} not found` });
-    }
-
-    res.json(task);
-
+    const taskId = parseInt(req.params.id);
+    db.get("SELECT * FROM tasks WHERE id = ?", [taskId], (err, row) => {
+        if (err) {
+            console.error("Error fetching task:", err);
+            return res.status(500).json({ message: "Error fetching task" });
+        }
+        if (!row) {
+            return res.status(404).json({ message: `Task ${taskId} not found` });
+        }
+        res.json(row);
+    });
 });
 
 app.post('/tasks', (req, res) => {
