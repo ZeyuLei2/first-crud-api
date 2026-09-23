@@ -77,16 +77,19 @@ app.post('/tasks', (req, res) => {
         return res.status(400).json({ message: "Title is required" });
     }
 
-    const newID = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
-    const newTask = {
-        id: newID,
-        title: title.trim(),
-        done: false
-    };
-    
-    tasks.push(newTask);
+    const cleanTitle = title.trim();
 
-    res.status(201).json(newTask);
+    db.run(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)", 
+        [cleanTitle, false], 
+        function(err) {
+        if (err) {
+            console.error("Error creating task:", err);
+            return res.status(500).json({ message: "Error creating task" });
+        }
+        const newTask = { id: this.lastID, title: cleanTitle, done: false };
+        res.status(201).json(newTask);
+    });
 });
 
 app.put('/tasks/:id', (req, res) => {
