@@ -94,12 +94,6 @@ app.post('/tasks', (req, res) => {
 
 app.put('/tasks/:id', (req, res) => {
     const taskId = parseInt(req.params.id);
-    const task = tasks.find(t => t.id === taskId);
-
-    if (!task) {
-        return res.status(404).json({ message: `Task ${taskId} not found` });
-    }
-    
     const { title, done } = req.body;
 
     if (title === undefined && done === undefined) {
@@ -109,29 +103,47 @@ app.put('/tasks/:id', (req, res) => {
     if (title !== undefined && title.trim() === "") {
         return res.status(400).json({ message: "Title cannot be empty" });
     }
-    if (title !== undefined) {
-        task.title = title.trim();
-    }
     if (done !== undefined && typeof done !== 'boolean') {
         return res.status(400).json({ message: "Done must be a boolean value" });
     }
-    if (done !== undefined) {
-        task.done = done;
-    }
+    db.get("SELECT * FROM tasks WHERE id = ?", [taskId], (err, row) => {
+        if (err) {
+            console.error("Error fetching task:", err);
+            return res.status(500).json({ message: "Error fetching task" });
+        }
+        if (!row) {
+            return res.status(404).json({ message: `Task ${taskId} not found` });
+        }
 
-    res.status(200).json(task);
+        const updatedTitle = title !== undefined ? title.trim() : row.title;
+        const updatedDone = done !== undefined ? done : row.done;
+
+        db.run(
+            "UPDATE tasks SET title = ?, done = ? WHERE id = ?", 
+            [updatedTitle, updatedDone, taskId], 
+            function(err) {
+                if (err) {
+                    console.error("Error updating task:", err);
+                    return res.status(500).json({ message: "Error updating task" });
+                }
+                res.json({ id: taskId, title: updatedTitle, done: updatedDone });
+            }
+        );
+    });
 });
 
 app.delete('/tasks/:id', (req, res) => {
     const taskId = parseInt(req.params.id);
-    const taskIndex = tasks.findIndex(t => t.id === taskId);
-    
-    if (taskIndex === -1) {
-        return res.status(404).json({ message: `Task ${taskId} not found` });
-    }
-
-    tasks.splice(taskIndex, 1);
-    res.status(204).send();
+    db.run("DELETE FROM tasks WHERE id = ?", [taskId], function(err) {
+        if (err) {
+            console.error("Error deleting task:", err);
+            return res.status(500).json({ message: "Error deleting task" });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ message: `Task ${taskId} not found` });
+        }
+        res.json({ message: `Task ${taskId} deleted successfully` });
+    });
 });
 
 app.listen(port, () => {
