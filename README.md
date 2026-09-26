@@ -1,117 +1,53 @@
-First CRUD API
+## SQLite Database
 
-A simple RESTful CRUD API built with Node.js and Express.js.
-This project demonstrates the basic Create, Read, Update, and Delete (CRUD) operations for managing tasks. It also includes Swagger UI documentation generated from an OpenAPI 3.0 specification.
+This project uses SQLite to store task data.
 
-Features
+### Why SQLite?
 
-* Create a new task
-* Get all tasks
-* Get a task by ID
-* Update a task
-* Delete a task
-* Interactive API documentation with Swagger UI
+SQLite was chosen because it is simple, lightweight, and does not require a separate database server. It is suitable for a small CRUD API project.
 
-Tech Stack
+### Database Location
 
-* Node.js
-* Express.js
-* Swagger UI Express
-* OpenAPI 3.0
+The database is stored in the project folder as:
 
-Installation
+`tasks.db`
 
-Clone the repository:
+If the database does not exist, the application will automatically create it when the server starts. The `tasks` table will also be created automatically.
 
-git clone https://github.com/ZeyuLei2/first-crud-api.git
-cd first-crud-api
+### How to Start the Project
 
-Install dependencies and start the server:
+Install the dependencies:
 
-npm install && node index.js
+```bash
+npm install
+```
 
-The server will start on:
+Start the server:
 
-http://localhost:3000
+```bash
+node index.js
+```
 
-Swagger UI is available at:
+The server will run at:
 
-http://localhost:3000/docs
+`http://localhost:3000`
 
-⸻
+Swagger documentation is available at:
 
-API Endpoints
+`http://localhost:3000/docs`
 
-Method	Endpoint	Description
-GET	/tasks	Get all tasks
-GET	/tasks/:id	Get a task by ID
-POST	/tasks	Create a new task
-PUT	/tasks/:id	Update a task
-DELETE	/tasks/:id	Delete a task
+### Database Viewer
 
-⸻
+I used DB Browser for SQLite to view and modify the database.
 
-Example Request
+![SQLite Database](images/sqlite-database.png)
 
-Create a new task:
+### Example SQL Query
 
-curl -i -X POST http://localhost:3000/tasks \
--H "Content-Type: application/json" \
--d '{"title":"Buy milk"}'
+For example, I used the following query to display all tasks:
 
-Example response:
+```sql
+SELECT * FROM tasks;
+```
 
-HTTP/1.1 201 Created
-Content-Type: application/json; charset=utf-8
-{
-  "id": 4,
-  "title": "Buy milk",
-  "done": false
-}
-
-⸻
-
-Project Structure
-
-First CRUD API/
-├── index.js
-├── openapi.json
-├── package.json
-├── package-lock.json
-├── README.md
-└── node_modules/
-
-⸻
-
-Swagger UI
-
-Open the following URL after starting the server:
-
-http://localhost:3000/docs
-
-⸻
-
-Example Task Object
-
-{
-  "id": 1,
-  "title": "Learn Node.js",
-  "done": false
-}
-
-⸻
-
-HTTP Status Codes
-
-Status Code	Meaning
-200	Request successful
-201	Resource created successfully
-204	Resource deleted successfully (no response body)
-400	Invalid request
-404	Task not found
-
-⸻
-
-Author
-
-Created as a learning project for building a RESTful CRUD API with Express.js and documenting it using OpenAPI 3.0 and Swagger UI.
+This query returns every task stored in the `tasks` table.
