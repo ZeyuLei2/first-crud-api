@@ -2,8 +2,9 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('../openapi.json');
 const createTaskRouter = require('./routes/tasks');
+const createAuthRouter = require('./routes/auth');
 
-function createApp(taskService) {
+function createApp(taskService, createAuthClient) {
   const app = express();
   app.use(express.json());
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -18,6 +19,7 @@ function createApp(taskService) {
     }
   });
   app.use('/tasks', createTaskRouter(taskService));
+  app.use('/auth', createAuthRouter(createAuthClient));
   return app;
 }
 

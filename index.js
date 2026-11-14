@@ -1,12 +1,12 @@
 require('dotenv').config();
-require('./src/lib/supabase');
+const { createSupabaseClient } = require('./src/lib/supabase');
 const { createApp } = require('./src/app');
 const PostgresTaskRepository = require('./src/repositories/postgresTaskRepository');
 const TaskService = require('./src/services/taskService');
 
 const port = Number(process.env.PORT) || 3000;
 const repository = new PostgresTaskRepository(process.env.DATABASE_URL);
-const app = createApp(new TaskService(repository));
+const app = createApp(new TaskService(repository), createSupabaseClient);
 const server = app.listen(port, () => console.log(`Server is running on http://localhost:${port}`));
 
 async function shutdown(signal) {
