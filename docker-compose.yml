@@ -18,6 +18,8 @@ services:
     environment:
       PORT: 3000
       DATABASE_URL: ${DATABASE_URL}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_KEY: ${SUPABASE_KEY}
     ports:
       - "${APP_PORT:-3000}:3000"
     depends_on:

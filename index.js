@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./src/lib/supabase');
 const { createApp } = require('./src/app');
 const PostgresTaskRepository = require('./src/repositories/postgresTaskRepository');
 const TaskService = require('./src/services/taskService');
