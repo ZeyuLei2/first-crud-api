@@ -1,6 +1,6 @@
 const express = require('express');
 
-function createAuthRouter(createClient) {
+function createAuthRouter(createClient, requireAuth) {
   const router = express.Router();
   router.use((req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -53,6 +53,22 @@ function createAuthRouter(createClient) {
       return serviceUnavailable(res);
     }
   });
+
+  if (requireAuth) {
+    router.post('/logout', requireAuth, async (req, res) => {
+      try {
+        // Target only the session identified by the verified access token.
+        const { error } = await req.authClient.auth.admin.signOut(req.accessToken, 'local');
+        if (error) {
+          if (isServiceError(error) || error.status === 429) return serviceUnavailable(res);
+          return res.status(401).json({ error: 'Invalid or expired token' });
+        }
+        return res.status(204).end();
+      } catch {
+        return serviceUnavailable(res);
+      }
+    });
+  }
 
   return router;
 }
