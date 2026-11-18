@@ -15,6 +15,25 @@ The API is at <http://localhost:3000>, Swagger UI is at <http://localhost:3000/d
 
 The `.env` file is gitignored. Change its example password for anything beyond local development. `DATABASE_URL` uses `db` as its hostname because that is the Compose service name.
 
+## Swagger UI authentication
+
+Open <http://localhost:3000/docs>. Auth, Public, and Protected endpoints are documented alongside the task API.
+
+1. Use **Try it out** on `POST /auth/login` with your test email and password.
+2. Copy the returned `access_token`.
+3. Click **Authorize**, paste only the token (without `Bearer `), and confirm.
+4. Execute `GET /protected/profile` and `GET /protected/dashboard`; both should return `200`.
+5. Execute `POST /auth/logout`; it should return `204` with an empty body.
+6. Clear the stored token using **Logout** in the Swagger authorization dialog.
+
+Without authorization, protected endpoints return `401`. Swagger's authorization dialog only manages the token used by the browser; its Logout button does not call the API logout endpoint. API logout ends the current session, but an issued access token may remain valid until expiry.
+
+### Screenshot
+
+Bearer authorization and protected endpoint requests were tested manually in Swagger UI. The screenshot shows the protected profile endpoint with its authorization padlock and a successful `200` response. Token content has been redacted.
+
+![Swagger UI with Bearer authentication](images/swagger-auth.png)
+
 ## Database initialization
 
 [`db/init.sql`](db/init.sql) creates the `tasks` table the first time PostgreSQL initializes an empty volume. PostgreSQL's Docker entrypoint does not rerun init scripts on an existing volume; apply later schema changes as migrations.
